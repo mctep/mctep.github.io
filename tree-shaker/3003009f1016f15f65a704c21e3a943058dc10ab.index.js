@@ -282,11 +282,12 @@ var TreeShaker = __webpack_require__(5);
 
 var _require = __webpack_require__(6),
     classNames = _require.classNames,
-    templates = _require.templates;
+    templates = _require.templates,
+    optionHeight = _require.optionHeight;
 
 __webpack_require__(4); // eslint-disable-line import/no-unassigned-import
 
-var treeShaker = new TreeShaker({ classNames: classNames, templates: templates });
+var treeShaker = new TreeShaker({ classNames: classNames, optionHeight: optionHeight, templates: templates });
 
 $('#tree-shaker').append(treeShaker.$element);
 treeShaker.updateHeight();
