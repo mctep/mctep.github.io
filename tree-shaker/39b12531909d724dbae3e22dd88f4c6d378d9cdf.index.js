@@ -7,7 +7,7 @@
 		exports["TreeShakerExample"] = factory(require("TreeShaker"), require("TreeShakerTheme"), require("_"), require("jQuery"));
 	else
 		root["TreeShakerExample"] = factory(root["TreeShaker"], root["TreeShakerTheme"], root["_"], root["jQuery"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_7__, __WEBPACK_EXTERNAL_MODULE_0__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_0__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -71,7 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "./";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -152,9 +152,9 @@ module.exports = function generateRandomNodes(count) {
 "use strict";
 'use strict';
 
-var _ = __webpack_require__(7);
+var _ = __webpack_require__(8);
 var $ = __webpack_require__(0);
-var DATA_URI = __webpack_require__(6);
+var DATA_URI = __webpack_require__(7);
 
 function parseData(data) {
 	var result = [];
@@ -186,13 +186,62 @@ module.exports = function getTeamcityProjects(callback) {
 /* 3 */
 /***/ function(module, exports) {
 
-// removed by extract-text-webpack-plugin
+"use strict";
+'use strict';
+
+/* eslint-env browser */
+
+function checkStorage(storage) {
+	if (typeof storage === 'undefined') {
+		return false;
+	}
+
+	try {
+		storage.setItem('storage', '');
+		storage.getItem('storage');
+		storage.removeItem('storage');
+
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
+var storage = null;
+
+if (checkStorage(window.sessionStorage)) {
+	storage = window.sessionStorage;
+} else if (checkStorage(window.localStorage)) {
+	storage = window.localStorage;
+} else {
+	(function () {
+		var data = {};
+
+		storage = {
+			clear: function clear() {
+				data = {};
+				Storage.length = 0;
+			},
+			getItem: function getItem(key) {
+				return data[key];
+			},
+			removeItem: function removeItem(key) {
+				delete data[key];
+			},
+			setItem: function setItem(key, value) {
+				data[key] = String(value);
+			}
+		};
+	})();
+}
+
+module.exports = storage;
 
 /***/ },
 /* 4 */
 /***/ function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+// removed by extract-text-webpack-plugin
 
 /***/ },
 /* 5 */
@@ -202,61 +251,85 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 
 /***/ },
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-module.exports = __webpack_require__.p + "544993722a7c837bdd1bcd81986e33ae.json";
+module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
 
 /***/ },
 /* 7 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
+module.exports = __webpack_require__.p + "4a8790616e6905d42001a3fe89ee45a5.json";
 
 /***/ },
 /* 8 */
+/***/ function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
+
+/***/ },
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 'use strict';
 
 var $ = __webpack_require__(0);
-
 var getTeamcityProjects = __webpack_require__(2);
 var generateRandomNodes = __webpack_require__(1);
+var storage = __webpack_require__(3);
+var TreeShaker = __webpack_require__(5);
 
-var _require = __webpack_require__(5),
+var _require = __webpack_require__(6),
     classNames = _require.classNames,
     templates = _require.templates;
 
-var TreeShaker = __webpack_require__(4);
-
-// eslint-disable-next-line import/no-unassigned-import
-__webpack_require__(3);
+__webpack_require__(4); // eslint-disable-line import/no-unassigned-import
 
 var treeShaker = new TreeShaker({ classNames: classNames, templates: templates });
 
 $('#tree-shaker').append(treeShaker.$element);
-
 treeShaker.updateHeight();
+loadTeamcityNodes();
 
-getTeamcityProjects(function (nodes) {
-	treeShaker.setNodes(nodes);
-});
+$('.example-button-teamcity').click(loadTeamcityNodes);
 
-$('.example-button-teamcity').click(function () {
-	getTeamcityProjects(function (nodes) {
-		treeShaker.setNodes(nodes);
-	});
-});
-
+// load random nodes
 $('.example-button-have-fun').click(function () {
 	var value = $('.example-input-count').val();
 	var count = parseInt(value.replace(/K/g, '000'), 10);
 
 	if (count > 0) {
+		treeShaker.offChosenNodesChange();
 		treeShaker.setNodes(generateRandomNodes(count));
+		treeShaker.refresh();
 	}
 });
+
+function getStoredChosenNodes() {
+	try {
+		return JSON.parse(storage.getItem('chosen-nodes'));
+	} catch (err) {
+		return null;
+	}
+}
+
+function loadTeamcityNodes() {
+	var storedChosenNodes = getStoredChosenNodes();
+
+	getTeamcityProjects(function (nodes) {
+		treeShaker.setNodes(nodes);
+		if (storedChosenNodes) {
+			treeShaker.setChosenNodes(storedChosenNodes);
+		}
+
+		treeShaker.onChosenNodesChange(function (chosenNodes) {
+			storage.setItem('chosen-nodes', JSON.stringify(chosenNodes));
+		});
+
+		treeShaker.refresh();
+	});
+}
 
 /***/ }
 /******/ ]);
